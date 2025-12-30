@@ -1,2 +1,1 @@
-# SecondBrain
-Organsing content
+"# SecondBrain" 
