@@ -6,16 +6,16 @@ dotenv.config();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendWelcomeEmail = async (email: string, name: string) => {
-    try {
-        const data = await resend.emails.send({
-            from: 'Second Brain <onboarding@resend.dev>', // Use resend.dev for testing if domain not verified
-            to: [email],
-            subject: 'Welcome to Second Brain! 🧠',
-            html: `
+  try {
+    const data = await resend.emails.send({
+      from: 'Akash Kumbar <onboarding@resend.dev>', // Use resend.dev for testing if domain not verified
+      to: [email],
+      subject: 'Welcome to Second Brain! 🧠',
+      html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background-color: #000; color: #fff; padding: 20px; border-radius: 10px;">
           <h1 style="color: #fff;">Welcome to Second Brain!</h1>
           <p>Hey ${name},</p>
-          <p>My name is Akash Kumbar – I'm the author of Second Brain.</p>
+          <p>My name is Akash Kumbar – I'm the founder and CEO of Second Brain.</p>
           <p>We started Second Brain because we wanted a better way to organize our digital lives. A simple, fast, and elegant interface that <i>just works</i>.</p>
           
           <p>Here are 3 tips to get started:</p>
@@ -31,13 +31,13 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
           <p>Cheers,<br>Akash Kumbar</p>
         </div>
       `,
-        });
+    });
 
-        console.log('Email sent successfully:', data);
-        return data;
-    } catch (error) {
-        console.error('Error sending email:', error);
-        // Don't throw error to prevent blocking auth flow
-        return null;
-    }
+    console.log('Email sent successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    // Don't throw error to prevent blocking auth flow
+    return null;
+  }
 };
