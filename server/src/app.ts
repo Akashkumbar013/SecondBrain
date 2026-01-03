@@ -13,6 +13,7 @@ import userRoutes from "./routes/user.routes"
 const app = express()
 
 app.use(cors())
+app.set("trust proxy", 1) // Trust first proxy (critical for Render/Heroku)
 app.use(express.json())
 app.use(passport.initialize());
 
