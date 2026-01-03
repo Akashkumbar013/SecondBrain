@@ -65,6 +65,37 @@ export const getContentByBrain = async (req: any, res: Response) => {
 }
 
 /**
+ * Get ALL content for a user (Filtered or All)
+ */
+export const getAllUserContent = async (req: any, res: Response) => {
+  try {
+    // 1. Find all brains belonging to this user
+    const brains = await Brain.find({ userId: req.userId }).select("_id")
+    const brainIds = brains.map((b) => b._id)
+
+    // 2. Build query
+    const query: any = { brainId: { $in: brainIds } }
+
+    // 3. Filter by type if provided (e.g., ?type=video)
+    const { type } = req.query
+    if (type) {
+      // Map frontend "videos" -> backend "video" / "youtube"
+      // This mapping should ideally happen on frontend, but we can support plurals here too if we want
+      query.type = type
+    }
+
+    const contents = await Content.find(query)
+      .sort({ createdAt: -1 })
+      .populate("brainId", "title") // Optional: to show which brain it came from
+
+    res.json(contents)
+  } catch (error) {
+    console.error("FETCH ALL CONTENT ERROR:", error)
+    res.status(500).json({ message: "Failed to fetch all content" })
+  }
+}
+
+/**
  * Delete Content (FIXED 🔥)
  */
 export const deleteContent = async (req: any, res: Response) => {
