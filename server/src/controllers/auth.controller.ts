@@ -1,9 +1,12 @@
+
 import { Request, Response } from "express"
 import bcrypt from "bcrypt"
-import User from "../models/User"
+import User from "../models/User";
+import jwt from "jsonwebtoken";
 import { generateToken } from "../utils/jwt"
 import { registerSchema, loginSchema } from "../schemas/auth.schema"
-import { sendWelcomeEmail, sendLoginEmail } from "../services/emailService"
+import { sendWelcomeEmail } from "../services/emailService"
+
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -23,7 +26,7 @@ export const register = async (req: Request, res: Response) => {
     })
 
     // Send Welcome Email
-    sendWelcomeEmail(user.email, user.name).catch(err => console.error("Email failed:", err));
+    await sendWelcomeEmail(user.email, user.name).catch(err => console.error("Email failed:", err));
 
     res.status(201).json({
       token: generateToken(user._id.toString()),
@@ -55,9 +58,6 @@ export const login = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" })
     }
-
-    // Send Login Email
-    sendLoginEmail(user.email, user.name).catch(err => console.error("Email failed:", err));
 
     res.json({
       token: generateToken(user._id.toString()),

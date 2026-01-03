@@ -94,7 +94,7 @@ function Dashboard({ filter }: DashboardProps) {
   const deleteFilteredContent = async (id: string) => {
     try {
       await api.delete(`/content/${id}`)
-      setFilteredContent(prev => prev.filter(c => c._id !== id))
+      setFilteredContent((prev: ContentItem[]) => prev.filter(c => c._id !== id))
     } catch (err) {
       console.error("Failed to delete", err)
     }
