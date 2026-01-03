@@ -20,15 +20,40 @@ function Navbar({ onAddContent, onToggleSidebar }: { onAddContent?: () => void, 
   const loadUser = async () => {
     try {
       const storedUser = localStorage.getItem("user")
+      const token = localStorage.getItem("token")
+
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser)
         setUser(parsedUser)
 
-        // Fetch latest data from server
         if (parsedUser._id) {
-          const res = await api.get(`/users/${parsedUser._id}`)
-          setUser(res.data)
-          localStorage.setItem("user", JSON.stringify(res.data))
+          try {
+            const res = await api.get(`/users/${parsedUser._id}`)
+            setUser(res.data)
+            localStorage.setItem("user", JSON.stringify(res.data))
+          } catch (error) {
+            console.error("Failed to refresh user data", error)
+          }
+        }
+      } else if (token) {
+        // Fallback: If no user in LS but we have a token (e.g. Google Login)
+        try {
+          // Decode token payload (JWT is header.payload.signature)
+          const base64Url = token.split('.')[1]
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+          const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+          }).join(''))
+
+          const payload = JSON.parse(jsonPayload)
+
+          if (payload.id) {
+            const res = await api.get(`/users/${payload.id}`)
+            setUser(res.data)
+            localStorage.setItem("user", JSON.stringify(res.data))
+          }
+        } catch (error) {
+          console.error("Failed to decode token or fetch user", error)
         }
       }
     } catch (err) {
