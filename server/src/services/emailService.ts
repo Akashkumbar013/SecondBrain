@@ -1,71 +1,57 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 dotenv.config();
 
-console.log('📧 Email Service Initialized');
+console.log('📧 Email Service Initialized (Resend)');
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587, // Use STARTTLS
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
-
-// Verify connection configuration
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log('❌ Email Service Connection Error:', error);
-    } else {
-        console.log('✅ Email Server is ready to take our messages');
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendWelcomeEmail = async (email: string, name: string) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-            console.warn('Email credentials missing. Skipping email.');
+        if (!process.env.RESEND_API_KEY) {
+            console.warn('RESEND_API_KEY missing. Skipping email.');
             return;
         }
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
+        const { data, error } = await resend.emails.send({
+            from: 'Second Brain <onboarding@resend.dev>', // Default Resend Testing Domain
+            to: [email],
             subject: 'Welcome to Second Brain!',
             text: `Hello ${name},\n\nWelcome to Second Brain! We are excited to have you on board.\n\nBest regards,\nThe Second Brain Team`,
-        };
+        });
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent: ' + info.response);
+        if (error) {
+            console.error('Error sending email:', error);
+            return;
+        }
+
+        console.log('Email sent successfully:', data);
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Unexpected error sending email:', error);
     }
 };
 
 export const sendLoginEmail = async (email: string, name: string) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-            console.warn('Email credentials missing. Skipping email.');
+        if (!process.env.RESEND_API_KEY) {
+            console.warn('RESEND_API_KEY missing. Skipping email.');
             return;
         }
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
+        const { data, error } = await resend.emails.send({
+            from: 'Second Brain <security@resend.dev>',
+            to: [email],
             subject: 'New Login to Second Brain',
             text: `Hello ${name},\n\nYou have just logged into your Second Brain account.\n\nIf this wasn't you, please contact support immediately.\n\nBest regards,\nThe Second Brain Team`,
-        };
+        });
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Login email sent: ' + info.response);
-    } catch (error: any) {
-        if (error.code === 'EAUTH') {
-            console.error('❌ Email Authentication Failed: Please check your EMAIL_USER and EMAIL_PASS in .env.');
-            console.error('👉 Ensure you are using an "App Password" (generated in Google Account > Security), NOT your regular password.');
-        } else {
+        if (error) {
             console.error('Error sending login email:', error);
+            return;
         }
+
+        console.log('Login email sent successfully:', data);
+    } catch (error) {
+        console.error('Unexpected error sending login email:', error);
     }
 };

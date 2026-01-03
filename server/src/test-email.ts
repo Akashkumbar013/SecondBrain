@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -6,46 +6,36 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 console.log('----------------------------------------');
-console.log('📧 Testing Email Configuration...');
+console.log('📧 Testing Email Configuration (Resend)...');
 console.log('----------------------------------------');
-console.log('EMAIL_USER:', process.env.EMAIL_USER || 'MISSING');
-console.log('EMAIL_PASS Length:', process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 'MISSING');
 
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error('❌ ERROR: Credentials missing in .env');
+if (!process.env.RESEND_API_KEY) {
+    console.error('❌ ERROR: RESEND_API_KEY missing in .env');
     process.exit(1);
 }
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const testEmail = async () => {
     try {
-        console.log('Attempting to verify connection...');
-        await transporter.verify();
-        console.log('✅ Connection verified successfully!');
-
         console.log('Attempting to send test email...');
-        const info = await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: process.env.EMAIL_USER, // Send to self
-            subject: 'Second Brain Config Test',
-            text: 'If you see this, your email config is working!',
+        const { data, error } = await resend.emails.send({
+            from: 'Second Brain <onboarding@resend.dev>',
+            to: ['recived_test_email@resend.dev'], // Use a safe test email or the user's if known. 
+            // Better to use 'delivered@resend.dev' for verification without spamming real inboxes initially or just check API response
+            // But usually users want to see it. "delivered@resend.dev" is a magic address that always succeeds.
+            subject: 'Second Brain Config Test (Resend)',
+            text: 'If you see this, your Resend config is working!',
         });
-        console.log('✅ Test email sent:', info.response);
+
+        if (error) {
+            console.error('❌ FAILED:', error);
+            return;
+        }
+
+        console.log('✅ Test email sent successfully:', data);
     } catch (error: any) {
         console.error('❌ FAILED:', error.message);
-        if (error.code === 'EAUTH') {
-            console.error('\n👉 SUGGESTION: Invalid App Password.');
-            console.error('   1. Go to Google Account > Security > 2-Step Verification (Enable it).');
-            console.error('   2. Search "App Passwords".');
-            console.error('   3. Generate a new one and paste it into .env');
-        }
     }
 };
 
