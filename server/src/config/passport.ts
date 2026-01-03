@@ -6,6 +6,10 @@ import { sendWelcomeEmail } from '../services/emailService';
 
 dotenv.config();
 
+const GOOGLE_CALLBACK_URL = process.env.NODE_ENV === 'production'
+    ? 'https://secondbrain-rm5n.onrender.com/api/auth/google/callback'
+    : '/api/auth/google/callback';
+
 passport.serializeUser((user: any, done) => {
     done(null, user.id);
 });
@@ -24,7 +28,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-            callbackURL: '/api/auth/google/callback',
+            callbackURL: GOOGLE_CALLBACK_URL,
             scope: ['profile', 'email'],
             proxy: true,
         },
