@@ -20,10 +20,18 @@ app.listen(PORT, () => {
 // DEBUG ROUTE: Remove in production later
 import { sendWelcomeEmail } from "./services/emailService";
 app.get('/debug-email', async (req, res) => {
+  const email = req.query.email as string;
+  if (!email) {
+    return res.status(400).json({ error: "Please provide an email query param: /debug-email?email=your@email.com" });
+  }
   try {
-    await sendWelcomeEmail(process.env.EMAIL_USER || "", "Test User");
-    res.json({ message: "Email Sent potentially. Check server logs." });
+    const result = await sendWelcomeEmail(email, "Debug User");
+    if (result) {
+      res.json({ message: `Email sent successfully to ${email}`, data: result });
+    } else {
+      res.status(500).json({ error: "Email function returned null (check server logs)" });
+    }
   } catch (error) {
-    res.status(500).json({ error });
+    res.status(500).json({ error: "Email failed", details: error });
   }
 });
