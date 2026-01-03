@@ -23,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
     })
 
     // Send Welcome Email
-    await sendWelcomeEmail(user.email, user.name);
+    sendWelcomeEmail(user.email, user.name).catch(err => console.error("Email failed:", err));
 
     res.status(201).json({
       token: generateToken(user._id.toString()),
@@ -57,7 +57,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Send Login Email
-    await sendLoginEmail(user.email, user.name);
+    sendLoginEmail(user.email, user.name).catch(err => console.error("Email failed:", err));
 
     res.json({
       token: generateToken(user._id.toString()),
