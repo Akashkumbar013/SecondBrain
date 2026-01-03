@@ -26,7 +26,8 @@ router.get(
         )
 
         // Redirect to client with token
-        res.redirect(`http://localhost:5173/auth/success?token=${token}`)
+        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+        res.redirect(`${clientUrl}/auth/success?token=${token}`)
     }
 )
 
