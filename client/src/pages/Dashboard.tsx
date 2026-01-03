@@ -16,6 +16,7 @@ function Dashboard() {
 
   const [showCreateBrain, setShowCreateBrain] = useState(false)
   const [showAddContent, setShowAddContent] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   const fetchBrains = async () => {
     try {
@@ -65,14 +66,18 @@ function Dashboard() {
       <div className="relative z-10 flex min-h-screen">
 
         {/* Sidebar */}
-        <Sidebar />
+        <Sidebar
+          mobileOpen={isMobileSidebarOpen}
+          onClose={() => setIsMobileSidebarOpen(false)}
+        />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col w-full">
 
           {/* Navbar */}
           <Navbar
             onAddContent={() => setShowAddContent(true)}
+            onToggleSidebar={() => setIsMobileSidebarOpen(true)}
           />
 
           {/* Page Content */}

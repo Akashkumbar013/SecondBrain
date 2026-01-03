@@ -11,7 +11,7 @@ type UserType = {
   profilePicture?: string
 }
 
-function Navbar({ onAddContent }: { onAddContent?: () => void }) {
+function Navbar({ onAddContent, onToggleSidebar }: { onAddContent?: () => void, onToggleSidebar?: () => void }) {
   const navigate = useNavigate()
   const [user, setUser] = useState<UserType | null>(null)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
@@ -57,6 +57,15 @@ function Navbar({ onAddContent }: { onAddContent?: () => void }) {
 
         {/* Left side */}
         <div className="flex items-center gap-4">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden text-slate-300 hover:text-white"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
         </div>
 
         {/* Right side controls */}
