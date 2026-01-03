@@ -13,3 +13,14 @@ connectDB()
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`)
 })
+
+// DEBUG ROUTE: Remove in production later
+import { sendWelcomeEmail } from "./services/emailService";
+app.get('/debug-email', async (req, res) => {
+  try {
+    await sendWelcomeEmail(process.env.EMAIL_USER || "", "Test User");
+    res.json({ message: "Email Sent potentially. Check server logs." });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});

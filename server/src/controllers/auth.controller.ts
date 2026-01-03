@@ -23,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
     })
 
     // Send Welcome Email
-    sendWelcomeEmail(user.email, user.name);
+    await sendWelcomeEmail(user.email, user.name);
 
     res.status(201).json({
       token: generateToken(user._id.toString()),
@@ -57,7 +57,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Send Login Email
-    sendLoginEmail(user.email, user.name);
+    await sendLoginEmail(user.email, user.name);
 
     res.json({
       token: generateToken(user._id.toString()),
