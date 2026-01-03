@@ -48,6 +48,7 @@ passport.use(
                     email: profile.emails![0].value,
                     password: 'google-auth-user', // Dummy password for Google users
                     isGoogleUser: true,
+                    isVerified: true,
                 });
 
                 await user.save();

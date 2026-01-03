@@ -41,3 +41,31 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
     return null;
   }
 };
+
+export const sendVerificationEmail = async (email: string, token: string) => {
+  const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${token}`;
+  // Note: Ideally this link should go to a frontend page which then calls the API, 
+  // OR go to the API which redirects to frontend. 
+  // Let's assume API redirect for simplicity: 
+  // API URL: http://localhost:5000/api/auth/verify-email?token=...
+  const apiUrl = `${process.env.VITE_API_URL || 'https://secondbrain-rm5n.onrender.com/api'}/auth/verify-email?token=${token}`;
+
+  try {
+    await resend.emails.send({
+      from: 'Akash Kumbar <onboarding@resend.dev>',
+      to: [email],
+      subject: 'Verify your email for Second Brain',
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2>Verify your email</h2>
+          <p>Please click the link below to verify your email address and activate your account:</p>
+          <a href="${apiUrl}" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Verify Email</a>
+          <p style="margin-top: 20px; color: #666; font-size: 14px;">Link expires in 24 hours.</p>
+        </div>
+      `
+    });
+    console.log(`Verification email sent to ${email}`);
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+  }
+}
