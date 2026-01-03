@@ -6,6 +6,9 @@ dotenv.config()
 
 const PORT = process.env.PORT || 5000
 
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
+
 // Connect DB first
 connectDB()
 

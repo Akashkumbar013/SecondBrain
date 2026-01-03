@@ -6,8 +6,8 @@ console.log('📧 Email Service Initialized');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465, // Use SSL
-    secure: true,
+    port: 587, // Use STARTTLS
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
