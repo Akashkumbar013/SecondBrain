@@ -3,6 +3,7 @@ import bcrypt from "bcrypt"
 import User from "../models/User"
 import { generateToken } from "../utils/jwt"
 import { registerSchema, loginSchema } from "../schemas/auth.schema"
+import { sendWelcomeEmail, sendLoginEmail } from "../services/emailService"
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -21,6 +22,9 @@ export const register = async (req: Request, res: Response) => {
       password: hashedPassword,
     })
 
+    // Send Welcome Email
+    sendWelcomeEmail(user.email, user.name);
+
     res.status(201).json({
       token: generateToken(user._id.toString()),
       user: {
@@ -30,7 +34,7 @@ export const register = async (req: Request, res: Response) => {
       },
     })
   } catch (error) {
-    res.status(400).json({ message: "Registration failed" })
+    res.status(400).json({ message: "Registration failed", error })
   }
 }
 
@@ -52,6 +56,9 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid credentials" })
     }
 
+    // Send Login Email
+    sendLoginEmail(user.email, user.name);
+
     res.json({
       token: generateToken(user._id.toString()),
       user: {
@@ -61,6 +68,6 @@ export const login = async (req: Request, res: Response) => {
       },
     })
   } catch (error) {
-    res.status(400).json({ message: "Login failed" })
+    res.status(400).json({ message: "Login failed", error })
   }
 }

@@ -4,7 +4,7 @@ const contentSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ["youtube", "tweet", "text", "link", "image"],
+      enum: ["youtube", "tweet", "text", "link", "image", "video", "pdf", "doc", "instagram"],
       required: true,
     },
     value: {

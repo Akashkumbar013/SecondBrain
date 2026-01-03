@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import api from "../services/api"
 import ContentRenderer from "./ContentRenderer"
@@ -55,56 +55,72 @@ function BrainCard({ brain, isActive, onSelect }: BrainCardProps) {
   }
 
   return (
-    <div
+    <motion.div
+      layout
       className={`
-        bg-slate-800 rounded-xl p-4 transition-all cursor-pointer
-        ${isActive ? "ring-2 ring-indigo-500" : "hover:bg-slate-700"}
+        relative overflow-hidden rounded-2xl p-0.5 transition-all duration-300
+        ${isActive ? "shadow-[0_0_20px_rgba(139,92,246,0.3)]" : "hover:shadow-lg"}
       `}
     >
-      {/* Header */}
-      <div
-        onClick={toggleOpen}
-        className="flex justify-between items-center select-none"
-      >
-        <h3 className="text-lg font-semibold text-white">
-          {brain.title}
-        </h3>
-        <span className="text-slate-400 text-xl">
-          {open ? "−" : "+"}
-        </span>
-      </div>
+      {/* Dynamic Border Gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br from-indigo-500/50 via-purple-500/20 to-pink-500/50 opacity-50 ${isActive ? 'opacity-100' : 'group-hover:opacity-80'}`} />
 
-      {/* Expanded Content */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="mt-4 space-y-4 overflow-hidden"
+      <div className="relative bg-[#0f111a]/90 backdrop-blur-xl rounded-[15px] h-full overflow-hidden">
+        <div
+          onClick={toggleOpen}
+          className="p-5 flex justify-between items-center cursor-pointer select-none group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_#6366f1]" />
+            <h3 className="text-lg font-bold text-white tracking-wide group-hover:text-indigo-300 transition-colors">
+              {brain.title}
+            </h3>
+          </div>
+
+          <motion.span
+            animate={{ rotate: open ? 180 : 0 }}
+            className="text-slate-400 text-xl"
           >
-            {loading && (
-              <p className="text-slate-400 text-sm">Loading...</p>
-            )}
+            ▼
+          </motion.span>
+        </div>
 
-            {!loading && contents.length === 0 && (
-              <p className="text-slate-400 text-sm">
-                No content added yet
-              </p>
-            )}
+        {/* Expanded Content */}
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="border-t border-slate-700/50 bg-[#0a0c12]/50"
+            >
+              <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-600 scrollbar-track-transparent">
+                {loading && (
+                  <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500" />
+                  </div>
+                )}
 
-            {contents.map((content) => (
-              <ContentRenderer
-                key={content._id}
-                content={content}
-                onDelete={() => deleteContent(content._id)}
-              />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+                {!loading && contents.length === 0 && (
+                  <p className="text-slate-500 text-sm text-center italic">
+                    No content captured yet.
+                  </p>
+                )}
+
+                {contents.map((content) => (
+                  <ContentRenderer
+                    key={content._id}
+                    content={content}
+                    onDelete={() => deleteContent(content._id)}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   )
 }
 
