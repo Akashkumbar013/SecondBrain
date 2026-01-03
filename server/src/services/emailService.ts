@@ -12,6 +12,15 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+// Verify connection configuration
+transporter.verify(function (error, success) {
+    if (error) {
+        console.log('❌ Email Service Connection Error:', error);
+    } else {
+        console.log('✅ Email Server is ready to take our messages');
+    }
+});
+
 export const sendWelcomeEmail = async (email: string, name: string) => {
     try {
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {

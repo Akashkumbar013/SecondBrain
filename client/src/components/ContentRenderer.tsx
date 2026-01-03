@@ -90,22 +90,13 @@ function ContentRenderer({
     }
   }, [content])
 
-  /* ---------- INSTAGRAM SCRIPT ---------- */
+  /* ---------- INSTAGRAM EMBED ---------- */
+  // No script needed for iframe approach, but keeping this effect clean
+  // in case we need to revert or add other scripts later.
   useEffect(() => {
-    if (content.type !== "instagram") return
-    if (!instaRef.current) return
-
-    // Re-inject script to trigger render
-    const script = document.createElement("script")
-    script.src = "//www.instagram.com/embed.js"
-    script.async = true
-    document.body.appendChild(script)
-
     // Cleanup if needed
-    return () => {
-      // document.body.removeChild(script)
-    }
-  }, [content])
+    return () => { }
+  }, [])
 
 
   /* ---------- RENDERERS ---------- */
@@ -186,11 +177,21 @@ function ContentRenderer({
 
   // 5. INSTAGRAM
   if (content.type === "instagram") {
+    // Ensure URL has /embed at the end for the iframe source
+    let embedUrl = content.value.split("?")[0] // Remove existing params
+    if (!embedUrl.endsWith("/")) embedUrl += "/"
+    embedUrl += "embed"
+
     return (
-      <div className="relative group bg-slate-900 rounded-xl p-2 mb-4 flex justify-center border border-slate-800">
-        <div ref={instaRef} dangerouslySetInnerHTML={{ __html: getInstagramEmbedHtml(content.value) }} />
-        <DeleteButton onDelete={onDelete} />
-      </div>
+      <ResizableWrapper defaultHeight="500px">
+        <iframe
+          src={embedUrl}
+          className="w-full h-full object-contain bg-white rounded-xl"
+          frameBorder="0"
+          scrolling="no"
+          allowTransparency
+        />
+      </ResizableWrapper>
     )
   }
 
