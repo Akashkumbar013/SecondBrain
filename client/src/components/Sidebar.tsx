@@ -1,5 +1,7 @@
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
 import logo from "../assets/Untitled design.png"
+import api from "../services/api"
 
 interface SidebarProps {
   mobileOpen?: boolean
@@ -7,6 +9,25 @@ interface SidebarProps {
 }
 
 function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
+  const [brains, setBrains] = useState([])
+
+  useEffect(() => {
+    const fetchBrains = async () => {
+      try {
+        const res = await api.get("/brains")
+        setBrains(res.data)
+      } catch (err) {
+        // silently fail or just log
+        console.error("Failed sidebar brains fetch", err)
+      }
+    }
+    fetchBrains()
+
+    // Listen for brain updates
+    window.addEventListener('brain-created', fetchBrains)
+    return () => window.removeEventListener('brain-created', fetchBrains)
+  }, [])
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -61,6 +82,24 @@ function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
           <NavItem to="/tweets" icon="🐦" label="Tweets" onClick={onClose} />
           <NavItem to="/links" icon="🔗" label="Links" onClick={onClose} />
           <NavItem to="/explore" icon="🌍" label="Explore" onClick={onClose} />
+
+          {/* MY BRAINS LIST */}
+          <div className="pt-4 pb-2">
+            <div className="px-6 text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">
+              My Brains
+            </div>
+            <div className="space-y-1">
+              {brains.map((brain: any) => (
+                <NavItem
+                  key={brain._id}
+                  to={`/brain/${brain._id}`}
+                  icon="🧠"
+                  label={brain.title}
+                  onClick={onClose}
+                />
+              ))}
+            </div>
+          </div>
         </nav>
 
         {/* Footer / User Info could go here */}

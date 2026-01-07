@@ -16,6 +16,10 @@ const contentSchema = new mongoose.Schema(
       ref: "Brain",
       required: true,
     },
+    metadata: {
+      width: String,
+      height: String
+    }
   },
   { timestamps: true }
 )

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Resizable } from "re-resizable"
+import api from "../services/api"
 
 declare global {
   interface Window {
@@ -27,20 +28,6 @@ function getYouTubeEmbedUrl(url: string) {
   }
 }
 
-function getInstagramEmbedHtml(url: string) {
-  // Simple blockquote approach for Instagram
-  // The script will replace it
-  return `
-      <blockquote 
-        class="instagram-media" 
-        data-instgrm-permalink="${url}"
-        data-instgrm-version="14"
-        style="background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"
-      >
-      </blockquote>
-    `
-}
-
 /* ---------- COMPONENTS ---------- */
 
 function ContentRenderer({
@@ -51,11 +38,24 @@ function ContentRenderer({
   onDelete: () => void
 }) {
   const tweetRef = useRef<HTMLDivElement | null>(null)
-  const instaRef = useRef<HTMLDivElement | null>(null)
   const renderedRef = useRef(false)
 
   // Default size state for resizable items
-  const [size, setSize] = useState({ width: "100%", height: "auto" })
+  // We initialize from content metadata if it exists
+  const [size, setSize] = useState({
+    width: content.metadata?.width || "100%",
+    height: content.metadata?.height || "auto"
+  })
+
+  // Update local state if content changes (e.g. initial load or props update)
+  useEffect(() => {
+    if (content.metadata?.width || content.metadata?.height) {
+      setSize({
+        width: content.metadata.width || "100%",
+        height: content.metadata.height || "auto"
+      })
+    }
+  }, [content.metadata?.width, content.metadata?.height])
 
   /* ---------- TWITTER SCRIPT ---------- */
   useEffect(() => {
@@ -90,38 +90,102 @@ function ContentRenderer({
     }
   }, [content])
 
-  /* ---------- INSTAGRAM EMBED ---------- */
-  // No script needed for iframe approach, but keeping this effect clean
-  // in case we need to revert or add other scripts later.
-  useEffect(() => {
-    // Cleanup if needed
-    return () => { }
-  }, [])
-
 
   /* ---------- RENDERERS ---------- */
 
+  // State to track resizing preventing iframe interaction
+  const [isResizing, setIsResizing] = useState(false)
+
+  const handleResizeStart = () => {
+    setIsResizing(true)
+  }
+
+  const handleResize = (e: any, direction: any, ref: any, d: any) => {
+    setSize({
+      width: ref.style.width,
+      height: ref.style.height,
+    })
+  }
+
+  const handleResizeStop = async (e: any, direction: any, ref: any, d: any) => {
+    setIsResizing(false)
+    const newWidth = ref.style.width
+    const newHeight = ref.style.height
+
+    // Final update just in case
+    setSize({ width: newWidth, height: newHeight })
+
+    try {
+      await api.put(`/content/${content._id}`, {
+        metadata: {
+          width: newWidth,
+          height: newHeight
+        }
+      })
+      console.log("Size saved:", newWidth, newHeight)
+    } catch (err) {
+      console.error("Failed to save resize", err)
+    }
+  }
+
   // WRAPPER FOR RESIZABLE
-  const ResizableWrapper = ({ children, defaultHeight = "300px" }: any) => (
-    <div className="relative group mb-4">
-      <Resizable
-        defaultSize={{
-          width: "100%",
-          height: defaultHeight,
-        }}
-        className="relative overflow-hidden rounded-xl border border-slate-700 bg-slate-900/50"
-        enable={{
-          top: false, right: false, bottom: true, left: false,
-          topRight: false, bottomRight: true, bottomLeft: false, topLeft: false
-        }}
-      >
-        {children}
-        <DeleteButton onDelete={onDelete} />
-        {/* Resize Handle Hint */}
-        <div className="absolute bottom-1 right-1 w-4 h-4 bg-slate-600/50 rounded-br cursor-nwse-resize hover:bg-indigo-500 transition-colors" />
-      </Resizable>
-    </div>
-  )
+  const ResizableWrapper = ({ children, defaultHeight = "300px" }: any) => {
+    // Logic:
+    // We use UNCONTROLLED mode (defaultSize) for smoother performance.
+    // We defaults to 350px width if no metadata is saved, avoiding "100%" collapse issues in flex containers.
+
+    // Parse saved size or use defaults
+    // We need to ensure we don't pass '100%' as a width to re-resizable in this context
+    const getInitWidth = () => {
+      if (content.metadata?.width && content.metadata.width !== "100%") return content.metadata.width
+      return "350px" // Default card width
+    }
+
+    const getInitHeight = () => {
+      if (content.metadata?.height && content.metadata.height !== "auto") return content.metadata.height
+      return defaultHeight
+    }
+
+    return (
+      <div className="relative group mb-6 p-1 bg-transparent">
+        {/* Removed w-fit here, letting Resizable dictate size */}
+        <Resizable
+          key={content._id} // Re-mount if content changes
+          defaultSize={{
+            width: getInitWidth(),
+            height: getInitHeight()
+          }}
+          onResizeStart={handleResizeStart}
+          onResize={handleResize}
+          onResizeStop={handleResizeStop}
+          className="relative !overflow-visible shadow-sm hover:shadow-md transition-shadow duration-300 rounded-xl bg-slate-900/40 border border-slate-800/50 backdrop-blur-sm"
+          handleClasses={{
+            bottomRight: "z-50",
+            right: "z-50",
+            bottom: "z-50"
+          }}
+          enable={{
+            top: false, right: true, bottom: true, left: false,
+            topRight: false, bottomRight: true, bottomLeft: false, topLeft: false
+          }}
+          lockAspectRatio={false}
+        >
+          {/* 
+              Pointer events logic:
+              When resizing, disable pointer events on children (iframes) so they don't capture mouse.
+          */}
+          <div className="w-full h-full overflow-hidden rounded-xl" style={{ pointerEvents: isResizing ? 'none' : 'auto' }}>
+            {children}
+          </div>
+
+          <DeleteButton onDelete={onDelete} />
+
+          {/* Resize Handle Hint - Visible for better UX */}
+          <div className="absolute bottom-0 right-0 w-6 h-6 z-50 cursor-nwse-resize group-hover:bg-slate-700/50 rounded-tl-lg transition-colors" />
+        </Resizable>
+      </div>
+    )
+  }
 
   // 1. YOUTUBE
   if (content.type === "youtube") {
@@ -151,7 +215,7 @@ function ContentRenderer({
   // 3. IMAGE
   if (content.type === "image") {
     return (
-      <ResizableWrapper defaultHeight="auto">
+      <ResizableWrapper defaultHeight="400px">
         <img
           src={content.value}
           alt="Brain content"
@@ -165,7 +229,7 @@ function ContentRenderer({
   // 4. VIDEO (Normal)
   if (content.type === "video") {
     return (
-      <ResizableWrapper defaultHeight="auto">
+      <ResizableWrapper defaultHeight="400px">
         <video
           src={content.value}
           controls

@@ -125,3 +125,66 @@ export const deleteContent = async (req: any, res: Response) => {
     res.status(500).json({ message: "Failed to delete content" })
   }
 }
+
+/**
+ * Update Content (e.g., Resize)
+ */
+export const updateContent = async (req: any, res: Response) => {
+  try {
+    const { id } = req.params
+    const updates = req.body
+
+    const content = await Content.findById(id)
+    if (!content) {
+      return res.status(404).json({ message: "Content not found" })
+    }
+
+    // Verify ownership
+    const brain = await Brain.findOne({
+      _id: content.brainId,
+      userId: req.userId,
+    })
+
+    if (!brain) {
+      return res.status(403).json({ message: "Unauthorized update" })
+    }
+
+    // Update fields
+    if (updates.metadata) {
+      content.metadata = { ...content.metadata, ...updates.metadata }
+    }
+    // Add other fields here if needed in future
+
+    await content.save()
+
+    res.json(content)
+  } catch (error) {
+    console.error("UPDATE CONTENT ERROR:", error)
+    res.status(500).json({ message: "Failed to update content" })
+  }
+}
+
+/**
+ * Get content for a public brain (no auth required)
+ */
+export const getPublicBrainContent = async (req: Request, res: Response) => {
+  try {
+    const { brainId } = req.params
+
+    // Verify the brain is public
+    const brain = await Brain.findOne({ _id: brainId, isPublic: true })
+
+    if (!brain) {
+      return res.status(404).json({ message: "Public brain not found" })
+    }
+
+    const contents = await Content.find({ brainId }).sort({
+      createdAt: -1,
+    })
+
+    res.json(contents)
+  } catch (error) {
+    console.error("FETCH PUBLIC CONTENT ERROR:", error)
+    res.status(500).json({ message: "Failed to fetch public brain content" })
+  }
+}
