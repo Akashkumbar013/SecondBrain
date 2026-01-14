@@ -7,10 +7,12 @@ function AuthSuccess() {
 
     useEffect(() => {
         const token = searchParams.get("token");
+        const userStr = searchParams.get("user");
         const redirect = searchParams.get("redirect");
 
-        if (token) {
+        if (token && userStr) {
             localStorage.setItem("token", token);
+            localStorage.setItem("user", userStr);
             // Redirect to the intended page or dashboard
             navigate(redirect || "/dashboard");
         } else {
