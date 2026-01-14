@@ -1,17 +1,20 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import api from "../services/api"
 import LightPillar from "../components/LightPillar"
 
 function Register() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  const redirectUrl = searchParams.get("redirect");
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
@@ -32,8 +35,8 @@ function Register() {
       // Save JWT
       localStorage.setItem("token", res.data.token)
 
-      // Navigate to dashboard
-      navigate("/dashboard")
+      // Navigate to redirect URL if present, otherwise dashboard
+      navigate(redirectUrl || "/dashboard")
     } catch (err: any) {
       setError(
         err.response?.data?.message || "Registration failed"
@@ -129,7 +132,7 @@ function Register() {
         <motion.a
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          href={`${import.meta.env.VITE_API_URL}/auth/google`}
+          href={`${import.meta.env.VITE_API_URL}/auth/google${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
           className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 py-2 rounded-lg font-semibold border border-white/10 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
