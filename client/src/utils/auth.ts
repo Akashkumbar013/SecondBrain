@@ -1,10 +1,10 @@
 import Cookies from 'js-cookie';
 
-// Cookie settings
+// Cookie settings - optimized for maximum persistence
 const COOKIE_OPTIONS = {
-    expires: 1, // 1 day (matches JWT expiration)
-    sameSite: 'lax' as const,
-    secure: import.meta.env.PROD, // Only use secure cookies in production (HTTPS)
+    expires: 7, // 7 days for better persistence
+    path: '/', // Available across entire domain
+    sameSite: 'lax' as const, // Lax for better compatibility
 };
 
 // Auth cookie management
@@ -17,55 +17,73 @@ export const auth = {
         if (consent === 'accepted') {
             Cookies.set('token', token, COOKIE_OPTIONS);
             Cookies.set('user', JSON.stringify(user), COOKIE_OPTIONS);
+
+            // Also store in localStorage as backup
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+
+            console.log('✅ Auth data saved to cookies and localStorage');
         } else if (consent === 'declined') {
-            // User declined cookies - show message or handle appropriately
             console.warn('Cannot save authentication: User declined cookies');
             alert('You need to accept cookies to stay logged in. Please refresh and accept cookies to use this feature.');
         } else {
-            // No consent yet - wait for user to accept
             console.warn('Waiting for cookie consent');
         }
     },
 
-    // Get token
+    // Get token - check both cookies and localStorage
     getToken: (): string | undefined => {
-        return Cookies.get('token');
+        let token = Cookies.get('token');
+        if (!token) {
+            // Fallback to localStorage
+            token = localStorage.getItem('token') || undefined;
+        }
+        return token;
     },
 
-    // Get user data
+    // Get user data - check both cookies and localStorage
     getUser: (): any | null => {
-        const userStr = Cookies.get('user');
+        let userStr = Cookies.get('user');
+        if (!userStr) {
+            // Fallback to localStorage
+            userStr = localStorage.getItem('user');
+        }
+
         if (!userStr) return null;
 
         try {
             return JSON.parse(userStr);
         } catch (error) {
-            console.error('Failed to parse user data from cookie:', error);
+            console.error('Failed to parse user data:', error);
             return null;
         }
     },
 
     // Check if authenticated
     isAuthenticated: (): boolean => {
-        const token = Cookies.get('token');
-        const userStr = Cookies.get('user');
+        const token = auth.getToken();
+        const user = auth.getUser();
 
-        if (!token || !userStr) return false;
-
-        try {
-            const user = JSON.parse(userStr);
-            return !!(user && user.id);
-        } catch (error) {
+        if (!token || !user) {
+            console.log('❌ Not authenticated - missing token or user');
             return false;
         }
+
+        if (!user.id) {
+            console.log('❌ Not authenticated - invalid user data');
+            return false;
+        }
+
+        console.log('✅ User is authenticated:', user.email);
+        return true;
     },
 
     // Clear authentication
     clearAuth: () => {
-        Cookies.remove('token');
-        Cookies.remove('user');
-        // Also clear any old localStorage data
+        Cookies.remove('token', { path: '/' });
+        Cookies.remove('user', { path: '/' });
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        console.log('🗑️ Auth data cleared');
     },
 };
