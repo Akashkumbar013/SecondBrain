@@ -17,7 +17,7 @@ export const createContent = async (req: any, res: Response) => {
     const brain = await Brain.findOne({
       _id: brainId,
       userId: req.userId,
-    })
+    }).lean()
 
     if (!brain) {
       return res.status(403).json({ message: "Unauthorized brain access" })
@@ -47,15 +47,15 @@ export const getContentByBrain = async (req: any, res: Response) => {
     const brain = await Brain.findOne({
       _id: brainId,
       userId: req.userId,
-    })
+    }).lean()
 
     if (!brain) {
       return res.status(403).json({ message: "Unauthorized" })
     }
 
-    const contents = await Content.find({ brainId }).sort({
-      createdAt: -1,
-    })
+    const contents = await Content.find({ brainId })
+      .sort({ createdAt: -1 })
+      .lean()
 
     res.json(contents)
   } catch (error) {
@@ -70,7 +70,7 @@ export const getContentByBrain = async (req: any, res: Response) => {
 export const getAllUserContent = async (req: any, res: Response) => {
   try {
     // 1. Find all brains belonging to this user
-    const brains = await Brain.find({ userId: req.userId }).select("_id")
+    const brains = await Brain.find({ userId: req.userId }).select("_id").lean()
     const brainIds = brains.map((b) => b._id)
 
     // 2. Build query
@@ -86,7 +86,8 @@ export const getAllUserContent = async (req: any, res: Response) => {
 
     const contents = await Content.find(query)
       .sort({ createdAt: -1 })
-      .populate("brainId", "title") // Optional: to show which brain it came from
+      .populate("brainId", "title")
+      .lean()
 
     res.json(contents)
   } catch (error) {
@@ -143,7 +144,7 @@ export const updateContent = async (req: any, res: Response) => {
     const brain = await Brain.findOne({
       _id: content.brainId,
       userId: req.userId,
-    })
+    }).lean()
 
     if (!brain) {
       return res.status(403).json({ message: "Unauthorized update" })
@@ -172,15 +173,15 @@ export const getPublicBrainContent = async (req: Request, res: Response) => {
     const { brainId } = req.params
 
     // Verify the brain is public
-    const brain = await Brain.findOne({ _id: brainId, isPublic: true })
+    const brain = await Brain.findOne({ _id: brainId, isPublic: true }).lean()
 
     if (!brain) {
       return res.status(404).json({ message: "Public brain not found" })
     }
 
-    const contents = await Content.find({ brainId }).sort({
-      createdAt: -1,
-    })
+    const contents = await Content.find({ brainId })
+      .sort({ createdAt: -1 })
+      .lean()
 
     res.json(contents)
   } catch (error) {

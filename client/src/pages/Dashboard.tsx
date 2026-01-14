@@ -141,6 +141,7 @@ function Dashboard({ filter }: DashboardProps) {
             }
         }
         loadData()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filter, brainId])
 
     // Dynamic Page Title

@@ -24,6 +24,8 @@ export const createBrain = async (req: AuthRequest, res: Response) => {
 
 export const getBrains = async (req: AuthRequest, res: Response) => {
   const brains = await Brain.find({ userId: req.userId })
+    .sort({ createdAt: -1 })
+    .lean()
   res.json(brains)
 }
 
@@ -33,7 +35,8 @@ export const getPublicBrains = async (req: Request, res: Response) => {
     const brains = await Brain.find({ isPublic: true })
       .populate('userId', 'name email')
       .sort({ createdAt: -1 })
-      .limit(100) // Limit for performance
+      .limit(100)
+      .lean()
 
     res.json(brains)
   } catch (error) {
@@ -48,6 +51,7 @@ export const getPublicBrain = async (req: Request, res: Response) => {
 
     const brain = await Brain.findOne({ _id: id, isPublic: true })
       .populate('userId', 'name email')
+      .lean()
 
     if (!brain) {
       return res.status(404).json({ message: "Public brain not found" })
@@ -65,7 +69,7 @@ export const deleteBrain = async (req: AuthRequest, res: Response) => {
     const { id } = req.params
 
     // Find brain and verify ownership
-    const brain = await Brain.findOne({ _id: id, userId: req.userId })
+    const brain = await Brain.findOne({ _id: id, userId: req.userId }).lean()
 
     if (!brain) {
       return res.status(404).json({ message: "Brain not found or unauthorized" })
