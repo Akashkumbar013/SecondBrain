@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { auth } from "../utils/auth";
 
 function AuthSuccess() {
     const [searchParams] = useSearchParams();
@@ -11,8 +12,9 @@ function AuthSuccess() {
         const redirect = searchParams.get("redirect");
 
         if (token && userStr) {
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", userStr);
+            // Save auth data in cookies
+            const user = JSON.parse(userStr);
+            auth.setAuth(token, user);
             // Redirect to the intended page or dashboard
             navigate(redirect || "/dashboard");
         } else {

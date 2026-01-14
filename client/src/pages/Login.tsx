@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import api from "../services/api"
 import LightPillar from "../components/LightPillar"
+import { auth } from "../utils/auth"
 
 function Login() {
   const navigate = useNavigate()
@@ -30,9 +31,8 @@ function Login() {
         password,
       })
 
-      // Save JWT
-      localStorage.setItem("token", res.data.token)
-      localStorage.setItem("user", JSON.stringify(res.data.user))
+      // Save JWT and user data in cookies
+      auth.setAuth(res.data.token, res.data.user)
 
       // Navigate to redirect URL if present, otherwise dashboard
       navigate(redirectUrl || "/dashboard")
