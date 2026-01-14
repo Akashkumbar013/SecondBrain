@@ -25,9 +25,13 @@ router.get(
             { expiresIn: "1d" }
         )
 
-        // Redirect to client with token
+        // Get redirect parameter from query
+        const redirect = req.query.redirect;
+
+        // Redirect to client with token and optional redirect parameter
         const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-        res.redirect(`${clientUrl}/auth/success?token=${token}`)
+        const redirectParam = redirect ? `&redirect=${encodeURIComponent(redirect as string)}` : '';
+        res.redirect(`${clientUrl}/auth/success?token=${token}${redirectParam}`)
     }
 )
 

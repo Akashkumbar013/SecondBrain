@@ -10,6 +10,9 @@ const Explore = lazy(() => import("./pages/Explore"))
 const AuthSuccess = lazy(() => import("./pages/AuthSuccess"))
 const PublicBrainView = lazy(() => import("./pages/PublicBrainView"))
 
+// Import ProtectedRoute component
+import ProtectedRoute from "./components/ProtectedRoute"
+
 // Loading component
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen bg-slate-950">
@@ -32,8 +35,12 @@ function App() {
         <Route path="/tweets" element={<Dashboard filter="tweet" />} />
         <Route path="/links" element={<Dashboard filter="link" />} />
         <Route path="/explore" element={<Explore />} />
-        {/* Public brain route - no auth required */}
-        <Route path="/public/brain/:brainId" element={<PublicBrainView />} />
+        {/* Public brain route - now requires authentication */}
+        <Route path="/public/brain/:brainId" element={
+          <ProtectedRoute>
+            <PublicBrainView />
+          </ProtectedRoute>
+        } />
       </Routes>
     </Suspense>
   )
