@@ -11,8 +11,20 @@ const COOKIE_OPTIONS = {
 export const auth = {
     // Save authentication data
     setAuth: (token: string, user: any) => {
-        Cookies.set('token', token, COOKIE_OPTIONS);
-        Cookies.set('user', JSON.stringify(user), COOKIE_OPTIONS);
+        // Check if user has consented to cookies
+        const consent = localStorage.getItem('cookieConsent');
+
+        if (consent === 'accepted') {
+            Cookies.set('token', token, COOKIE_OPTIONS);
+            Cookies.set('user', JSON.stringify(user), COOKIE_OPTIONS);
+        } else if (consent === 'declined') {
+            // User declined cookies - show message or handle appropriately
+            console.warn('Cannot save authentication: User declined cookies');
+            alert('You need to accept cookies to stay logged in. Please refresh and accept cookies to use this feature.');
+        } else {
+            // No consent yet - wait for user to accept
+            console.warn('Waiting for cookie consent');
+        }
     },
 
     // Get token

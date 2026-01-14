@@ -1,6 +1,9 @@
 import { Routes, Route } from "react-router-dom"
 import { lazy, Suspense } from "react"
 
+// Import CookieConsent component
+import CookieConsent from "./components/CookieConsent"
+
 // Lazy load all pages for better performance
 const LandingPage = lazy(() => import("./pages/LandingPage"))
 const Login = lazy(() => import("./pages/Login"))
@@ -23,28 +26,34 @@ const PageLoader = () => (
 
 function App() {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth/success" element={<AuthSuccess />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/brain/:brainId" element={<Dashboard />} />
-        <Route path="/notes" element={<Dashboard filter="text" />} />
-        <Route path="/videos" element={<Dashboard filter="video" />} />
-        <Route path="/tweets" element={<Dashboard filter="tweet" />} />
-        <Route path="/links" element={<Dashboard filter="link" />} />
-        <Route path="/explore" element={<Explore />} />
-        {/* Public brain route - now requires authentication */}
-        <Route path="/public/brain/:brainId" element={
-          <ProtectedRoute>
-            <PublicBrainView />
-          </ProtectedRoute>
-        } />
-      </Routes>
-    </Suspense>
+    <>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth/success" element={<AuthSuccess />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/brain/:brainId" element={<Dashboard />} />
+          <Route path="/notes" element={<Dashboard filter="text" />} />
+          <Route path="/videos" element={<Dashboard filter="video" />} />
+          <Route path="/tweets" element={<Dashboard filter="tweet" />} />
+          <Route path="/links" element={<Dashboard filter="link" />} />
+          <Route path="/explore" element={<Explore />} />
+          {/* Public brain route - now requires authentication */}
+          <Route path="/public/brain/:brainId" element={
+            <ProtectedRoute>
+              <PublicBrainView />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Suspense>
+
+      {/* Cookie Consent Banner */}
+      <CookieConsent />
+    </>
   )
 }
 
 export default App
+
