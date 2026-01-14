@@ -14,6 +14,7 @@ const PublicBrainView = lazy(() => import("./pages/PublicBrainView"))
 import ProtectedRoute from "./components/ProtectedRoute"
 
 // Loading component
+// Last updated: 2026-01-14 - Force rebuild for authentication fix
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen bg-slate-950">
     <div className="text-white text-xl">Loading...</div>
