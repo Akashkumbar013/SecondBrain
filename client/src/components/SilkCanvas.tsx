@@ -1,42 +1,11 @@
 /* eslint-disable react/no-unknown-property */
 /**
- * Silk - Animated background component using Three.js
- * A beautiful, flowing silk-like shader animation
- * 
- * Note: This component uses dynamic imports to avoid SSR issues
+ * SilkCanvas - The actual Three.js canvas component
+ * Separated to allow dynamic importing
  */
-import React, { useState, useEffect } from 'react';
-
-export interface SilkProps {
-    speed?: number;
-    scale?: number;
-    color?: string;
-    noiseIntensity?: number;
-    rotation?: number;
-}
-
-const Silk: React.FC<SilkProps> = ({ speed = 5, scale = 1, color = '#7B7481', noiseIntensity = 1.5, rotation = 0 }) => {
-    const [SilkComponent, setSilkComponent] = useState<React.ComponentType<SilkProps> | null>(null);
-
-    useEffect(() => {
-        // Only load Three.js on the client side
-        import('./SilkCanvas').then((mod) => {
-            setSilkComponent(() => mod.default);
-        }).catch((err) => {
-            console.error('Failed to load Silk component:', err);
-        });
-    }, []);
-
-    // Don't render during SSR
-    if (!SilkComponent) {
-        return null;
-    }
-
-    return <SilkComponent speed={speed} scale={scale} color={color} noiseIntensity={noiseIntensity} rotation={rotation} />;
-};
-
-export default Silk;
-
+import React, { forwardRef, useMemo, useRef, useLayoutEffect } from 'react';
+import { Canvas, useFrame, useThree, type RootState } from '@react-three/fiber';
+import { Color, Mesh, ShaderMaterial, type IUniform } from 'three';
 
 type NormalizedRGB = [number, number, number];
 
@@ -152,7 +121,7 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms
 });
 SilkPlane.displayName = 'SilkPlane';
 
-export interface SilkProps {
+export interface SilkCanvasProps {
     speed?: number;
     scale?: number;
     color?: string;
@@ -160,14 +129,8 @@ export interface SilkProps {
     rotation?: number;
 }
 
-const Silk: React.FC<SilkProps> = ({ speed = 5, scale = 1, color = '#7B7481', noiseIntensity = 1.5, rotation = 0 }) => {
+const SilkCanvas: React.FC<SilkCanvasProps> = ({ speed = 5, scale = 1, color = '#7B7481', noiseIntensity = 1.5, rotation = 0 }) => {
     const meshRef = useRef<Mesh>(null);
-    const [isMounted, setIsMounted] = useState(false);
-
-    // Only render on client side to avoid SSR issues
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
 
     const uniforms = useMemo<SilkUniforms>(
         () => ({
@@ -181,11 +144,6 @@ const Silk: React.FC<SilkProps> = ({ speed = 5, scale = 1, color = '#7B7481', no
         [speed, scale, noiseIntensity, color, rotation]
     );
 
-    // Don't render during SSR
-    if (!isMounted) {
-        return null;
-    }
-
     return (
         <Canvas dpr={[1, 2]} frameloop="always" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1 }}>
             <SilkPlane ref={meshRef} uniforms={uniforms} />
@@ -193,4 +151,4 @@ const Silk: React.FC<SilkProps> = ({ speed = 5, scale = 1, color = '#7B7481', no
     );
 };
 
-export default Silk;
+export default SilkCanvas;
