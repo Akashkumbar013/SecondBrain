@@ -1,29 +1,49 @@
+/**
+ * Second Brain - Backend API
+ * 
+ * Copyright (c) 2026 Akash Kumbar
+ * Licensed under the MIT License
+ * 
+ * This file is part of the Second Brain application.
+ * Original repository: https://github.com/Akashkumbar013/SecondBrain
+ */
+
 import express from "express"
 import cors from "cors"
 import passport from "passport";
 import "./config/passport"; // Import passport config
-
-import path from "path"
+import cookieSession from "cookie-session";
+import connectDB from "./config/db"
 import authRoutes from "./routes/auth.routes"
 import brainRoutes from "./routes/brain.routes"
 import contentRoutes from "./routes/content.routes"
-import uploadRoutes from "./routes/upload.routes"
-import userRoutes from "./routes/user.routes"
+import morgan from "morgan"
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const app = express()
 
-app.use(cors())
-app.set("trust proxy", 1) // Trust first proxy (critical for Render/Heroku)
+// Middleware
+app.use(morgan("tiny"))
 app.use(express.json())
+app.use(cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+}))
+
 app.use(passport.initialize());
 
-// Serve static files from "uploads" directory
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")))
-
+// Routes
 app.use("/api/auth", authRoutes)
-app.use("/api/brains", brainRoutes)
+app.use("/api/brain", brainRoutes)
 app.use("/api/content", contentRoutes)
-app.use("/api/upload", uploadRoutes)
-app.use("/api/users", userRoutes)
+
+app.get("/", (req, res) => {
+    res.send("Second Brain API - Created by Akash Kumbar")
+})
+
+// Connect to DB and start server
+connectDB()
 
 export default app
