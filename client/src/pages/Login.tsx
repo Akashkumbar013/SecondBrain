@@ -2,7 +2,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import api from "../services/api"
-import Silk from "../components/Silk"
+import LightPillar from "../components/LightPillar"
 import { auth } from "../utils/auth"
 
 function Login() {
@@ -48,14 +48,24 @@ function Login() {
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden font-sans selection:bg-indigo-500/30 flex items-center justify-center">
 
-      {/* 🌑 SILK ANIMATED BACKGROUND */}
-      <Silk
-        speed={3}
-        scale={1.2}
-        color="#4f46e5"
-        noiseIntensity={1.2}
-        rotation={0}
-      />
+      {/* 🌑 BACKGROUND EFFECTS */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#1a1f35] via-[#020617] to-black opacity-80" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
+      </div>
+
+      {/* 🌌 LIGHT PILLAR */}
+      <div className="fixed inset-0 z-[1] pointer-events-none opacity-50">
+        <LightPillar
+          topColor="#6366f1"
+          bottomColor="#000000"
+          intensity={1}
+          rotationSpeed={0.1}
+          glowAmount={0.005}
+          pillarWidth={4}
+          pillarHeight={0.6}
+        />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 50, scale: 0.95 }}
