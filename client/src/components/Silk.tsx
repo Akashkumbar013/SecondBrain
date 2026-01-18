@@ -2,11 +2,12 @@
 /**
  * Silk - Animated background component using Three.js
  * A beautiful, flowing silk-like shader animation
+ * 
+ * Note: This component only renders on the client side to avoid SSR issues
  */
-import React, { forwardRef, useMemo, useRef, useLayoutEffect } from 'react';
-import { Canvas, useFrame, useThree, RootState } from '@react-three/fiber';
-import { Color, Mesh, ShaderMaterial } from 'three';
-import { IUniform } from 'three';
+import React, { forwardRef, useMemo, useRef, useLayoutEffect, useState, useEffect } from 'react';
+import { Canvas, useFrame, useThree, type RootState } from '@react-three/fiber';
+import { Color, Mesh, ShaderMaterial, type IUniform } from 'three';
 
 type NormalizedRGB = [number, number, number];
 
@@ -132,6 +133,12 @@ export interface SilkProps {
 
 const Silk: React.FC<SilkProps> = ({ speed = 5, scale = 1, color = '#7B7481', noiseIntensity = 1.5, rotation = 0 }) => {
     const meshRef = useRef<Mesh>(null);
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Only render on client side to avoid SSR issues
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const uniforms = useMemo<SilkUniforms>(
         () => ({
@@ -144,6 +151,11 @@ const Silk: React.FC<SilkProps> = ({ speed = 5, scale = 1, color = '#7B7481', no
         }),
         [speed, scale, noiseIntensity, color, rotation]
     );
+
+    // Don't render during SSR
+    if (!isMounted) {
+        return null;
+    }
 
     return (
         <Canvas dpr={[1, 2]} frameloop="always" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1 }}>
