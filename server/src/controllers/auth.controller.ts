@@ -52,6 +52,14 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid credentials" })
     }
 
+    // Check if user is a Google OAuth user
+    if (user.isGoogleUser || !user.password) {
+      return res.status(400).json({
+        message: "This account uses Google Sign-In. Please log in with Google.",
+        isGoogleUser: true
+      })
+    }
+
     const isMatch = await bcrypt.compare(
       data.password,
       user.password

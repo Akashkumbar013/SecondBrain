@@ -46,7 +46,7 @@ passport.use(
                 user = new User({
                     name: profile.displayName,
                     email: profile.emails![0].value,
-                    password: 'google-auth-user', // Dummy password for Google users
+                    // No password for Google users - field is now optional
                     isGoogleUser: true,
                     isVerified: true,
                 });

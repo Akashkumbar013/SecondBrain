@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false, // Optional for Google OAuth users
+    },
+    isGoogleUser: {
+      type: Boolean,
+      default: false,
     },
     profilePicture: {
       type: String,
