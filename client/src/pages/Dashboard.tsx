@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
 import { useParams, useNavigate } from "react-router-dom"
 
 import Sidebar from "../components/Sidebar"
@@ -7,7 +6,6 @@ import Navbar from "../components/Navbar"
 import BrainCard from "../components/BrainCard"
 import CreateBrainModal from "../components/CreateBrainModal"
 import AddContentModal from "../components/AddContentModal"
-import LightPillar from "../components/LightPillar"
 import api from "../services/api"
 import ContentRenderer from "../components/ContentRenderer"
 
@@ -154,35 +152,9 @@ function Dashboard({ filter }: DashboardProps) {
     }
 
     return (
-        <div className="relative min-h-screen overflow-hidden text-white">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
 
-            {/* 🌑 BASE DARK GRADIENT (IMPORTANT) */}
-            <div
-                className="fixed inset-0 z-0"
-                style={{
-                    background:
-                        "radial-gradient(circle at center, #0b1020 0%, #020617 60%, #000000 100%)",
-                }}
-            />
-
-            {/* 🌌 LIGHT PILLAR BACKGROUND */}
-            <div className="fixed inset-0 z-[1] pointer-events-none">
-                <LightPillar
-                    topColor="#8B5CF6"
-                    bottomColor="#3B82F6"
-                    intensity={1.3}
-                    rotationSpeed={0.25}
-                    glowAmount={0.007}
-                    pillarWidth={3.5}
-                    pillarHeight={0.55}
-                    noiseIntensity={0.2}
-                    interactive={false}
-                    mixBlendMode="screen"
-                />
-            </div>
-
-            {/* 🧠 UI LAYER */}
-            <div className="relative z-10 flex min-h-screen">
+            <div className="flex min-h-screen">
 
                 {/* Sidebar */}
                 <Sidebar
@@ -201,13 +173,9 @@ function Dashboard({ filter }: DashboardProps) {
 
                     {/* Page Content */}
                     <div className="p-6">
-                        <motion.h1
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-2xl font-bold mb-6"
-                        >
+                        <h1 className="text-2xl font-bold mb-6">
                             {pageTitle}
-                        </motion.h1>
+                        </h1>
 
                         {/* CONTENT GRID VIEW (Filtered OR Specific Brain) */}
                         {(filter || brainId) && (
@@ -261,14 +229,12 @@ function Dashboard({ filter }: DashboardProps) {
 
             {/* Floating Create Brain Button - Only show on Dashboard main view */}
             {!filter && (
-                <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
+                <button
                     onClick={() => setShowCreateBrain(true)}
-                    className="fixed bottom-6 left-6 z-20 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-full shadow-lg font-semibold"
+                    className="fixed bottom-6 left-6 z-20 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-full shadow-lg font-semibold transition-colors"
                 >
                     + Create Brain
-                </motion.button>
+                </button>
             )}
 
             {/* Modals */}

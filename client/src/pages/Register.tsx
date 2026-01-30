@@ -1,8 +1,6 @@
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import api from "../services/api"
-import LightPillar from "../components/LightPillar"
 
 function Register() {
   const navigate = useNavigate()
@@ -30,10 +28,8 @@ function Register() {
         password,
       })
 
-      // Save JWT
       localStorage.setItem("token", res.data.token)
 
-      // Navigate to redirect URL if present, otherwise dashboard
       const redirectUrl = searchParams.get("redirect")
       navigate(redirectUrl || "/dashboard")
     } catch (err: any) {
@@ -46,42 +42,16 @@ function Register() {
   }
 
   return (
-    <div className="relative min-h-screen bg-black text-white overflow-hidden font-sans selection:bg-indigo-500/30 flex items-center justify-center">
-
-      {/* 🌑 BACKGROUND EFFECTS */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#1a1f35] via-[#020617] to-black opacity-80" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
-      </div>
-
-      {/* 🌌 LIGHT PILLAR */}
-      <div className="fixed inset-0 z-[1] pointer-events-none opacity-50">
-        <LightPillar
-          topColor="#6366f1"
-          bottomColor="#000000"
-          intensity={1}
-          rotationSpeed={0.1}
-          glowAmount={0.005}
-          pillarWidth={4}
-          pillarHeight={0.6}
-        />
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative z-10 w-[380px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl"
-      >
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-gray-800 rounded-lg border border-gray-700 shadow-xl p-8">
         <h1 className="text-3xl font-bold text-center mb-2">
           Create Account ✨
         </h1>
 
-        <p className="text-center text-slate-300 text-sm mb-8">
+        <p className="text-center text-gray-400 text-sm mb-8">
           Start building your second brain
         </p>
 
-        {/* Error */}
         {error && (
           <p className="text-red-400 text-sm mb-4 text-center">
             {error}
@@ -93,7 +63,7 @@ function Register() {
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full mb-4 px-4 py-2 rounded-lg bg-slate-800/70 border border-slate-600 outline-none focus:border-indigo-500"
+          className="w-full mb-4 px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 outline-none focus:border-indigo-500 text-white"
         />
 
         <input
@@ -101,7 +71,7 @@ function Register() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-4 px-4 py-2 rounded-lg bg-slate-800/70 border border-slate-600 outline-none focus:border-indigo-500"
+          className="w-full mb-4 px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 outline-none focus:border-indigo-500 text-white"
         />
 
         <input
@@ -109,30 +79,27 @@ function Register() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-6 px-4 py-2 rounded-lg bg-slate-800/70 border border-slate-600 outline-none focus:border-indigo-500"
+          onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+          className="w-full mb-6 px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 outline-none focus:border-indigo-500 text-white"
         />
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={handleRegister}
           disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-lg font-semibold disabled:opacity-60"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-semibold disabled:opacity-60 transition-colors"
         >
           {loading ? "Creating account..." : "Register"}
-        </motion.button>
+        </button>
 
-        <div className="my-4 flex items-center gap-2 opacity-50">
-          <div className="h-px flex-1 bg-slate-600" />
-          <span className="text-xs text-slate-400">OR</span>
-          <div className="h-px flex-1 bg-slate-600" />
+        <div className="my-4 flex items-center gap-2">
+          <div className="h-px flex-1 bg-gray-600" />
+          <span className="text-xs text-gray-500">OR</span>
+          <div className="h-px flex-1 bg-gray-600" />
         </div>
 
-        <motion.a
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <a
           href={`${import.meta.env.VITE_API_URL}/auth/google`}
-          className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 py-2 rounded-lg font-semibold border border-white/10 transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-semibold border border-gray-600 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -153,9 +120,9 @@ function Register() {
             />
           </svg>
           Continue with Google
-        </motion.a>
+        </a>
 
-        <p className="text-center text-sm text-slate-400 mt-6">
+        <p className="text-center text-sm text-gray-400 mt-6">
           Already have an account?{" "}
           <span
             className="text-indigo-400 hover:underline cursor-pointer"
@@ -164,7 +131,7 @@ function Register() {
             Login
           </span>
         </p>
-      </motion.div>
+      </div>
     </div>
   )
 }
