@@ -1,13 +1,11 @@
 import axios from "axios"
-import { auth } from "../utils/auth"
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 })
 
-// Attach token from cookies to all API requests
 api.interceptors.request.use((config) => {
-  const token = auth.getToken()
+  const token = localStorage.getItem("token")
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

@@ -36,7 +36,7 @@ app.use(passport.initialize());
 
 // Routes
 app.use("/api/auth", authRoutes)
-app.use("/api/brain", brainRoutes)
+app.use("/api/brains", brainRoutes)
 app.use("/api/content", contentRoutes)
 
 app.get("/", (req, res) => {
