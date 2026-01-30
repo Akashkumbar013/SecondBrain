@@ -8,7 +8,7 @@ dotenv.config();
 
 const GOOGLE_CALLBACK_URL = process.env.NODE_ENV === 'production'
     ? 'https://secondbrain-rm5n.onrender.com/api/auth/google/callback'
-    : '/api/auth/google/callback';
+    : 'http://localhost:5000/api/auth/google/callback';
 
 passport.serializeUser((user: any, done) => {
     done(null, user.id);
