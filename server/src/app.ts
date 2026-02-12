@@ -17,8 +17,10 @@ import connectDB from "./config/db"
 import authRoutes from "./routes/auth.routes"
 import brainRoutes from "./routes/brain.routes"
 import contentRoutes from "./routes/content.routes"
+import uploadRoutes from "./routes/upload.routes"
 import morgan from "morgan"
 import dotenv from "dotenv"
+import path from "path"
 
 dotenv.config()
 
@@ -34,10 +36,14 @@ app.use(cors({
 
 app.use(passport.initialize());
 
+// Serve uploaded files statically
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")))
+
 // Routes
 app.use("/api/auth", authRoutes)
 app.use("/api/brains", brainRoutes)
 app.use("/api/content", contentRoutes)
+app.use("/api/upload", uploadRoutes)
 
 app.get("/", (req, res) => {
     res.send("Second Brain API - Created by Akash Kumbar")

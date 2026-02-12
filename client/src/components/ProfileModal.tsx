@@ -26,7 +26,12 @@ function ProfileModal({ user, onClose, onUpdate }: ProfileModalProps) {
             const uploadRes = await api.post("/upload", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             })
-            const photoUrl = uploadRes.data.url
+            // Handle both old and new response formats
+            const photoUrl = uploadRes.data.url || uploadRes.data.data?.url
+
+            if (!photoUrl) {
+                throw new Error("No URL returned from server")
+            }
 
             // 2. Update User Profile
             await api.put(`/users/${user._id}`, {
@@ -35,9 +40,10 @@ function ProfileModal({ user, onClose, onUpdate }: ProfileModalProps) {
 
             // 3. Refresh
             onUpdate()
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to upload profile picture", err)
-            alert("Failed to update profile picture")
+            const errorMsg = err.response?.data?.message || "Failed to update profile picture. Please try again."
+            alert(errorMsg)
         } finally {
             setUploading(false)
         }
